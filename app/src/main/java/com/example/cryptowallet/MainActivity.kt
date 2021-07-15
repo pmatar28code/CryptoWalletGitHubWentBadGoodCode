@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.Room
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import retrofit2.Call
 import retrofit2.Callback
@@ -20,13 +21,22 @@ class MainActivity : AppCompatActivity() {
         const val CLIENT_SECRET = "84e2a6a63dc56f5d5be617f77cf71c0c4069a7e3a49cb9e2ce7e5d2bddea007f"
         const val MY_REDIRECT_URI = "cryptowallet://callback"
         var accessToken:AccessToken?=null
+        val DATABASE_NAME = "COINBASE DATABASE"
     }
+    var database:Database ?= null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val inflater = LayoutInflater.from(this)
         val binding = ActivityMainBinding.inflate(inflater)
         setContentView(binding.root)
+
+        database = Room.databaseBuilder(
+            applicationContext,
+            Database::class.java,
+            DATABASE_NAME
+        ).fallbackToDestructiveMigration()
+            .build()
 
         if(intent.data == null) {
             val intent = Intent(

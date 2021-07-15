@@ -5,7 +5,7 @@ import androidx.room.RoomDatabase
 import com.example.cryptowallet.dao.AccessTokenDao
 
 @Database(
-    entities=[AccessToken::class],
+    entities=[AccessTokenDCLass::class],
     version = 1
 )
 abstract class Database: RoomDatabase(){

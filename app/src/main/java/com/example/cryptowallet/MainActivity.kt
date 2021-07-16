@@ -37,7 +37,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         database = CoinBaseDatabase.getInstance(applicationContext)
-        
+
         if (intent.data != null) {
             val intent = Intent(
                 Intent.ACTION_VIEW,

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -18,6 +19,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import kotlin.reflect.jvm.internal.impl.serialization.deserialization.descriptors.DeserializedMemberDescriptor
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -37,13 +39,24 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         database = CoinBaseDatabase.getInstance(applicationContext)
+        binding.button.setOnClickListener {
+            CoroutineScope(IO).launch {
+                var codeList = getCode()
+                if (codeList.isEmpty()) {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
+                    )
+                    startActivity(intent)
+                } else {
 
-        if (intent.data != null) {
-            val intent = Intent(
-                Intent.ACTION_VIEW,
-                Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
-            )
-            startActivity(intent)
+                    Log.e("IF WE GOT CODE", "Whats next")
+                    Toast.makeText(this@MainActivity,"Already have code, so we can use the token ${accessToken?.expires_in}",Toast.LENGTH_SHORT).show()
+                }
+                addCode(intent.data?.getQueryParameter("code")!!)
+            }
+
+
         }
     }
 
@@ -106,5 +119,33 @@ class MainActivity : AppCompatActivity() {
     private suspend fun setToken(tokenList:List<AccessTokenDCLass>){
         token = tokenList[0].access_token
 
+        if(token != "" && token != null && token != " "){
+            Log.e("CHECK TOKEN"," got token $token")
+        }else{
+            Log.e("CHECK TOKEN ELSE","no token ")
+        }
+
+    }
+
+    private fun authorizationRequest(callback: (String) -> Unit){
+        if (intent.data == null) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
+            )
+            startActivity(intent)
+            var code = intent.data?.getQueryParameter("code")
+            callback(code!!)
+        }
+    }
+
+    private suspend fun getCode():List<JustCode>{
+        var codeList = database?.JustCodeDao()?.getAllCodes()
+        return codeList!!
+    }
+
+    private suspend fun addCode(code:String){
+        var justCode = JustCode(code = code)
+        database?.JustCodeDao()?.addCode(justCode)
     }
 }

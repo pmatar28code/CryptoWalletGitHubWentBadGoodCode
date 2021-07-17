@@ -52,6 +52,31 @@ class MainActivity : AppCompatActivity() {
                 Log.e("FIRST Run", "getting the code")
             } else {
                 Log.e("WHATS NEXT", "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${testingTokenList?.get(0)}")
+
+                val retrofitBuilder = Retrofit.Builder()
+                    .baseUrl("https://api.coinbase.com/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                val retrofit = retrofitBuilder.build()
+                val coinBaseClientForApi = retrofit.create(CoinBaseClienApiCalls::class.java)
+                var accessToken = testingTokenList?.get(0)?.access_token!!
+                Log.e("ACCESS TOKEN LOG","this: $accessToken")
+                val accessCall = coinBaseClientForApi.getUser(
+                    " Bearer "+ accessToken
+                )
+                accessCall.enqueue(object: Callback<UserData>{
+                    override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
+                        Log.e("Testing Api Call good response"," with grantType and bearer test ${response.body()?.name}")
+                    }
+
+                    override fun onFailure(call: Call<UserData>, t: Throwable) {
+                        Log.e("Failed","conexion failed $t")
+                    }
+
+                })
+
+
+
+
             }
         }
     }

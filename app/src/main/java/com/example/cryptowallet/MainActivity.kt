@@ -8,18 +8,15 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toUri
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import kotlin.reflect.jvm.internal.impl.serialization.deserialization.descriptors.DeserializedMemberDescriptor
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -31,6 +28,8 @@ class MainActivity : AppCompatActivity() {
     var database:CoinBaseDatabase ?= null
     //var tokenList:List<AccessTokenDCLass> ?=null
     var token:String ?= ""
+    var testingCodeList:List<JustCode>?=null
+    var testingTokenList:List<AccessTokenDCLass>?=null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -39,24 +38,21 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         database = CoinBaseDatabase.getInstance(applicationContext)
-        binding.button.setOnClickListener {
-            CoroutineScope(IO).launch {
-                var codeList = getCode()
-                if (codeList.isEmpty()) {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
-                    )
-                    startActivity(intent)
-                } else {
 
-                    Log.e("IF WE GOT CODE", "Whats next")
-                    Toast.makeText(this@MainActivity,"Already have code, so we can use the token ${accessToken?.expires_in}",Toast.LENGTH_SHORT).show()
-                }
-                addCode(intent.data?.getQueryParameter("code")!!)
+        CoroutineScope(IO).launch {
+            testingCodeList = getCode()
+            testingTokenList = getAllTokens()
+
+            if (testingCodeList!!.isEmpty()) {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
+                )
+                startActivity(intent)
+                Log.e("FIRST Run", "getting the code")
+            } else {
+                Log.e("WHATS NEXT", "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${testingTokenList?.get(0)}")
             }
-
-
         }
     }
 
@@ -65,6 +61,11 @@ class MainActivity : AppCompatActivity() {
         val uri = intent.data
         if(uri != null){
             val code = uri.getQueryParameter("code")!!
+            CoroutineScope(IO).launch {
+                addCode(code)
+                var testCodeList2 = getCode()
+                Log.e("ADDING CODE","ADDED CODE TO DATABASE $testCodeList2")
+            }
             //cryptowallet://callback?code=e260bd24659d7ee7c88acf1550839ded1a90b159d4cb37d24fd208df4a4222fb
             val retrofitBuilder = Retrofit.Builder()
                 .baseUrl("https://api.coinbase.com/")
@@ -90,10 +91,11 @@ class MainActivity : AppCompatActivity() {
                     )
                     if(accessToken != null) {
                         addToken(accessToken!!)
-                        Toast.makeText(this@MainActivity,"ACCESS TOKEN ADDED TO DATABASE $accessToken",Toast.LENGTH_SHORT).show()
-
+                        Log.e("ADDED TOKEN TO DATABASE","ACCESS TOKEN ADDED TO DATABASE $accessToken")
+                        val intent =Intent(this@MainActivity, MainActivity::class.java)
+                        startActivity(intent)
                     }else{
-                        Toast.makeText(this@MainActivity,"ACCESS TOKEN IS NULL $accessToken",Toast.LENGTH_SHORT).show()
+                        Log.e("TOKEN IS NULL","ACCESS TOKEN IS NULL $accessToken")
                     }
 
                 }
@@ -110,21 +112,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getAllTokens(){
+    private suspend fun getAllTokens():List<AccessTokenDCLass>{
         var tokenList = database?.AccessTokenDao()?.getAllTokens()!!
-
-        setToken(tokenList)
-
-    }
-    private suspend fun setToken(tokenList:List<AccessTokenDCLass>){
-        token = tokenList[0].access_token
-
-        if(token != "" && token != null && token != " "){
-            Log.e("CHECK TOKEN"," got token $token")
+        if(tokenList.isEmpty()){
+            return emptyList()
         }else{
-            Log.e("CHECK TOKEN ELSE","no token ")
+            return tokenList
         }
-
     }
 
     private fun authorizationRequest(callback: (String) -> Unit){
@@ -139,12 +133,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private suspend fun getCode():List<JustCode>{
+    suspend fun getCode():List<JustCode>{
         var codeList = database?.JustCodeDao()?.getAllCodes()
         return codeList!!
     }
 
-    private suspend fun addCode(code:String){
+    suspend fun addCode(code:String){
         var justCode = JustCode(code = code)
         database?.JustCodeDao()?.addCode(justCode)
     }

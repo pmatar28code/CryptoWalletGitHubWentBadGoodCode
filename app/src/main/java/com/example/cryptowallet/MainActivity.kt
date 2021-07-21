@@ -58,25 +58,20 @@ class MainActivity : AppCompatActivity() {
                     .addConverterFactory(GsonConverterFactory.create())
                 val retrofit = retrofitBuilder.build()
                 val coinBaseClientForApi = retrofit.create(CoinBaseClienApiCalls::class.java)
-                var accessToken = testingTokenList?.get(0)?.access_token!!
+                val accessToken = "0e56471d9a1f7557f0700853fa5b8017f3a395c03ba4388c15ed9a1a5ba3ca77"//testingTokenList?.get(0)?.access_token!!
                 Log.e("ACCESS TOKEN LOG","this: $accessToken")
                 val accessCall = coinBaseClientForApi.getUser(
-                    " Bearer "+ accessToken
+                    " Bearer $accessToken"
                 )
                 accessCall.enqueue(object: Callback<UserData>{
                     override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
-                        Log.e("Testing Api Call good response"," with grantType and bearer test ${response.body()?.name}")
+                        Log.e("Testing Api Call good response"," response: ${response.body()?.data?.name}")
                     }
 
                     override fun onFailure(call: Call<UserData>, t: Throwable) {
                         Log.e("Failed","conexion failed $t")
                     }
-
                 })
-
-
-
-
             }
         }
     }

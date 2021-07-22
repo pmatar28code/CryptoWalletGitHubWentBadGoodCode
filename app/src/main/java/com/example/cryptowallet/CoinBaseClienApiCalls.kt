@@ -7,7 +7,7 @@ interface CoinBaseClienApiCalls {
     //@Headers("Accept: application/json")
    // @POST("v2/user")
     //@FormUrlEncoded
-    @GET("v2/user/")
+    @GET("v2/user")
     fun getUser(@Header("Authorization") token:String
         //@Field("grant_type")grant_type:String,
         //@Field("bearer")bearer:String

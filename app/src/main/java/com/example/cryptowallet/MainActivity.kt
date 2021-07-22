@@ -58,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                     .addConverterFactory(GsonConverterFactory.create())
                 val retrofit = retrofitBuilder.build()
                 val coinBaseClientForApi = retrofit.create(CoinBaseClienApiCalls::class.java)
-                val accessToken = "0e56471d9a1f7557f0700853fa5b8017f3a395c03ba4388c15ed9a1a5ba3ca77"//testingTokenList?.get(0)?.access_token!!
+                val accessToken = testingTokenList?.get(0)?.access_token!!
                 Log.e("ACCESS TOKEN LOG","this: $accessToken")
                 val accessCall = coinBaseClientForApi.getUser(
                     " Bearer $accessToken"

@@ -65,7 +65,15 @@ class MainActivity : AppCompatActivity() {
                 )
                 accessCall.enqueue(object: Callback<UserData>{
                     override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
-                        Log.e("Testing Api Call good response"," with grantType and bearer test ${response.body()?.name}")
+                        Log.e("Testing Api Call good response"," response: ${response.body()?.name}")
+                        val userId = response.body()?.id
+                        if(userId !=null && userId != "") {
+                            Repository.userId = response.body()?.id!!
+                            AddressNetwork.getAddresses {
+                                Repository.nAddressFromResponse = it
+                                Log.e("Repository naddress:","${Repository.nAddressFromResponse}")
+                            }
+                        }
                     }
 
                     override fun onFailure(call: Call<UserData>, t: Throwable) {
@@ -73,10 +81,6 @@ class MainActivity : AppCompatActivity() {
                     }
 
                 })
-
-
-
-
             }
         }
     }

@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toUri
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -46,7 +47,7 @@ class MainActivity : AppCompatActivity() {
             if (testingCodeList!!.isEmpty()) {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
+                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaddresses%3Acreate") //&scope=wallet%3Auser%3Aread
                 )
                 startActivity(intent)
                 Log.e("FIRST Run", "getting the code")
@@ -59,19 +60,127 @@ class MainActivity : AppCompatActivity() {
                 val retrofit = retrofitBuilder.build()
                 val coinBaseClientForApi = retrofit.create(CoinBaseClienApiCalls::class.java)
                 val accessToken = testingTokenList?.get(0)?.access_token!!
+                Repository.lastToken = accessToken
                 Log.e("ACCESS TOKEN LOG","this: $accessToken")
                 val accessCall = coinBaseClientForApi.getUser(
                     " Bearer $accessToken"
                 )
+
+
+                //from here
+/*
+                val retrofitBuilderAddress = Retrofit.Builder()
+                    .baseUrl("https://api.coinbase.com/")
+                    .addConverterFactory(GsonConverterFactory.create())
+                val retrofitAddress = retrofitBuilderAddress.build()
+                val coinBaseAddressApi = retrofitAddress.create(AddressApi::class.java)
+                val addressCall = coinBaseAddressApi.getAddress(" Bearer $accessToken")
+                addressCall.enqueue(object: Callback<NAddress>{
+                    override fun onResponse(
+                        call: Call<NAddress>,
+                        response: Response<NAddress>
+                    ) {
+                        Log.e(" Good REsp ADDRESS PM","${response.body()?.data?.address} - ${response.isSuccessful}")
+                    }
+
+                    override fun onFailure(call: Call<NAddress>, t: Throwable) {
+                        Log.e("address failure conexion","$t")
+                    }
+
+                })
+
+ */
+                //to here
+
                 accessCall.enqueue(object: Callback<UserData>{
                     override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
                         Log.e("Testing Api Call good response"," response: ${response.body()?.data?.name}")
+                        Repository.userId = response.body()?.data?.id!!
+                        Log.e("USER ID FIRST","${Repository.userId}")
+                        //"68c41609-6b0f-5209-a655-e9a81ddd91d2"
+                        val refreshToken = testingTokenList?.get(0)?.refresh_token!!
+                        Log.e("THiS IS THE REFRESH TOKEN TO GET NEW","$refreshToken")
+                        val retrofitBuilderRefresh = Retrofit.Builder()
+                            .baseUrl("https://api.coinbase.com/")
+                            .addConverterFactory(GsonConverterFactory.create())
+                        val retrofitRefresh = retrofitBuilderRefresh.build()
+                        val refreshApi = retrofitRefresh.create(RefreshApi::class.java)
+                        val refreshCall = refreshApi.refreshToken(
+                            "refresh_token",
+                            MY_CLIENT_ID,
+                            CLIENT_SECRET,
+                            refreshToken
+                            )
+
+                        refreshCall?.enqueue(object: Callback<AccessToken>{
+                            override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>
+                            ){
+                                Log.e("RESPOND REFRESH OK","Refresehd token: ${response.body()?.access_token} ok? ${response.isSuccessful}")
+                                val refreshedAccessToken = response.body()?.access_token
+                                Log.e("THIS REFRESH TOKEN:","$refreshedAccessToken")
+
+
+                                //Repository.lastToken = refreshedAccessToken!!
+
+                                val retrofitBuilderAddress = Retrofit.Builder()
+                                    .baseUrl("https://api.coinbase.com/")
+                                    .addConverterFactory(GsonConverterFactory.create())
+                                val retrofitAddress = retrofitBuilderAddress.build()
+                                val coinBaseAddressApi = retrofitAddress.create(AddressApi::class.java)
+                                val addressCall = coinBaseAddressApi.getAddress(" Bearer $refreshedAccessToken")
+                                addressCall.enqueue(object: Callback<NAddress>{
+                                    override fun onResponse(call: Call<NAddress>, response: Response<NAddress>
+                                    ) {
+                                        Log.e(" Good REsp ADDRESS PM","${response.body()?.data?.address} - ${response.isSuccessful}")
+                                    }
+
+                                    override fun onFailure(call: Call<NAddress>, t: Throwable) {
+                                        Log.e("address failure conexion","$t")
+                                    }
+
+                                })
+
+                            }
+
+                            override fun onFailure(call: Call<AccessToken>, t: Throwable) {
+                            }
+
+                        })
+/* good
+                        val retrofitBuilderAddress = Retrofit.Builder()
+                            .baseUrl("https://api.coinbase.com/")
+                            .addConverterFactory(GsonConverterFactory.create())
+                        val retrofitAddress = retrofitBuilderAddress.build()
+                        val coinBaseAddressApi = retrofitAddress.create(AddressApi::class.java)
+                        val addressCall = coinBaseAddressApi.getAddress(" Bearer $accessToken")
+                        addressCall.enqueue(object: Callback<NAddress>{
+                            override fun onResponse(
+                                call: Call<NAddress>,
+                                response: Response<NAddress>
+                            ) {
+                                Log.e(" Good REsp ADDRESS PM","${response.body()?.data?.address} - ${response.isSuccessful}")
+                            }
+
+                            override fun onFailure(call: Call<NAddress>, t: Throwable) {
+                                Log.e("address failure conexion","$t")
+                            }
+
+                        })
+*/
+
+                        //AddressNetwork.getAddresses {
+                        //    Repository.nAddressFromResponse = it
+                        //    Log.e("REPOSITORY ADRESS:",
+                        //        Repository.nAddressFromResponse?.address?:"no address"
+                        //    )
+                        //}
                     }
 
                     override fun onFailure(call: Call<UserData>, t: Throwable) {
                         Log.e("Failed","conexion failed $t")
                     }
                 })
+
             }
         }
     }

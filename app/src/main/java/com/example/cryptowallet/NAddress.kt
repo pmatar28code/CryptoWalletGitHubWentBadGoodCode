@@ -11,21 +11,21 @@ data class NAddress(
 ) {
     @JsonClass(generateAdapter = true)
     data class Data(
-        @Json(name = "address")
-        val address: String?,
-        @Json(name = "created_at")
-        val createdAt: String?,
         @Json(name = "id")
         val id: String?,
+        @Json(name = "address")
+        val address: String?,
         @Json(name = "name")
         val name: String?,
+        @Json(name = "created_at")
+        val createdAt: String?,
+        @Json(name = "updated_at")
+        val updatedAt: String?,
         @Json(name = "network")
         val network: String?,
         @Json(name = "resource")
         val resource: String?,
         @Json(name = "resource_path")
-        val resourcePath: String?,
-        @Json(name = "updated_at")
-        val updatedAt: String?
-    )
+        val resourcePath: String?
+        )
 }

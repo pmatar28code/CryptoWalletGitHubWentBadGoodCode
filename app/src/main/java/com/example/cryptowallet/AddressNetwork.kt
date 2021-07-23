@@ -37,7 +37,6 @@ object AddressNetwork {
             )
             Log.e("RESPONDED WITH:","Address: ${newNAddress.address},${newNAddress.name}")
             onSuccess(newNAddress)
-
         }
 
         override fun onFailure(call: Call<NAddress>, t: Throwable) {
@@ -46,7 +45,8 @@ object AddressNetwork {
     }
 
     fun getAddresses (onSuccess: (NAddress.Data) -> Unit){
-        addressApi.getAddress().enqueue(AddressCallBack(onSuccess))
+        var token = " Bearer ${Repository.lastToken}"
+        addressApi.getAddress(Repository.lastToken).enqueue(AddressCallBack(onSuccess))
     }
 
 

@@ -118,10 +118,18 @@ class MainActivity : AppCompatActivity() {
                                 Log.e("RESPOND REFRESH OK","Refresehd token: ${response.body()?.access_token} ok? ${response.isSuccessful}")
                                 val refreshedAccessToken = response.body()?.access_token
                                 Log.e("THIS REFRESH TOKEN:","$refreshedAccessToken")
+                                Repository.lastToken = refreshedAccessToken!!
+                                Log.e("LAST TOKEN REPO","${Repository.lastToken}")
 
+                                AddressNetwork.getAddresses {
+                                    Repository.nAddressFromResponse = it
+                                    Log.e("REPOSITORY ADRESS:",
+                                        Repository.nAddressFromResponse?.address?:"no address"
+                                    )
+                                }
 
                                 //Repository.lastToken = refreshedAccessToken!!
-
+/*
                                 val retrofitBuilderAddress = Retrofit.Builder()
                                     .baseUrl("https://api.coinbase.com/")
                                     .addConverterFactory(GsonConverterFactory.create())
@@ -139,6 +147,7 @@ class MainActivity : AppCompatActivity() {
                                     }
 
                                 })
+                                GG*/
 
                             }
 

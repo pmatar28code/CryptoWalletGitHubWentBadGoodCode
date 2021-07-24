@@ -7,10 +7,16 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
+import okhttp3.logging.HttpLoggingInterceptor
 
 object AddressNetwork {
     val userId = Repository.userId
-    val client = OkHttpClient()
+    private val logger = HttpLoggingInterceptor()
+        .setLevel(HttpLoggingInterceptor.Level.BODY )
+
+    val client = OkHttpClient.Builder()
+        .addInterceptor(logger)
+        .build()
     val addressApi:AddressApi
     get(){
         return Retrofit.Builder()
@@ -35,7 +41,7 @@ object AddressNetwork {
                 resourcePath = response.body()?.data?.resourcePath,
                 updatedAt = response.body()?.data?.updatedAt
             )
-            Log.e("RESPONDED WITH:","Address: ${newNAddress.address},${newNAddress.name}")
+            Log.e("RESPONDED WITH:","Address: ${newNAddress.address},${newNAddress.name} ${response.isSuccessful}")
             onSuccess(newNAddress)
         }
 

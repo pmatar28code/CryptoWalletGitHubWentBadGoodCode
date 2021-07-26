@@ -53,25 +53,9 @@ class MainActivity : AppCompatActivity() {
             } else {
                 Log.e("WHATS NEXT", "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${testingTokenList?.get(0)}")
 
-                val retrofitBuilder = Retrofit.Builder()
-                    .baseUrl("https://api.coinbase.com/")
-                    .addConverterFactory(GsonConverterFactory.create())
-                val retrofit = retrofitBuilder.build()
-                val coinBaseClientForApi = retrofit.create(CoinBaseClienApiCalls::class.java)
-                val accessToken = testingTokenList?.get(0)?.access_token!!
-                Log.e("ACCESS TOKEN LOG","this: $accessToken")
-                val accessCall = coinBaseClientForApi.getUser(
-                    " Bearer $accessToken"
-                )
-                accessCall.enqueue(object: Callback<UserData>{
-                    override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
-                        Log.e("Testing Api Call good response"," response: ${response.body()?.data?.name}")
-                    }
-
-                    override fun onFailure(call: Call<UserData>, t: Throwable) {
-                        Log.e("Failed","conexion failed $t")
-                    }
-                })
+                UserNetwork.getUser {
+                    Log.e("SHOWING USER","${it.name}")
+                }
             }
         }
     }
@@ -111,6 +95,7 @@ class MainActivity : AppCompatActivity() {
                     )
                     if(accessToken != null) {
                         addToken(accessToken!!)
+                        Repository.accessToken = accessToken?.access_token?:""
                         Log.e("ADDED TOKEN TO DATABASE","ACCESS TOKEN ADDED TO DATABASE $accessToken")
                         val intent =Intent(this@MainActivity, MainActivity::class.java)
                         startActivity(intent)

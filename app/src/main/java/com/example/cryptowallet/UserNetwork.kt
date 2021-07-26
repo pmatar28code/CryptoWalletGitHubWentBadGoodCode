@@ -12,10 +12,12 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 object UserNetwork {
     //private val logger = HttpLoggingInterceptor()
      //   .setLevel(HttpLoggingInterceptor.Level.BODY )
-
-    val client = OkHttpClient() //.Builder()
-        //.addInterceptor(logger)
-        //.build()
+    private val accessTokenProvider = AccessTokenProviderImp()
+    private val accessTokenInterceptor = AccessTokenInterceptor(accessTokenProvider)
+    val client = OkHttpClient.Builder()
+        .addNetworkInterceptor(accessTokenInterceptor)
+        .authenticator(AccessTokenAuthenticator(accessTokenProvider))
+        .build()
     val coinBaseClienApiCalls:CoinBaseClienApiCalls
         get(){
             return Retrofit.Builder()
@@ -59,7 +61,7 @@ object UserNetwork {
         }
         if(token != ""){
 
-            coinBaseClienApiCalls.getUser(" Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
+            coinBaseClienApiCalls.getUser("Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
         }else{
             Log.e("ACCESS TOKEN IN REPOSITORY","${Repository.accessToken}")
         }

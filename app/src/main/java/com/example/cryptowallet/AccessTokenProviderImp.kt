@@ -4,13 +4,12 @@ import android.app.Application
 import android.util.Log
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.launch
 
 class AccessTokenProviderImp :AccessTokenProvider, Application() {
-    companion object {
-        var token: AccessTokenDCLass?=null
-    }
+
+    var token: AccessTokenDCLass?=null
+
     override fun token(): AccessTokenDCLass? {
         CoroutineScope(IO).launch {
             getTokenDatabase {

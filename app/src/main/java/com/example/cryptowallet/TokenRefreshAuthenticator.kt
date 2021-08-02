@@ -9,9 +9,8 @@ import okhttp3.Route
 class TokenRefreshAuthenticator(
     private val authorizationRepository: AccessTokenProvider
 ) : Authenticator {
-    companion object{
-        var FreshAccessToken:AccessToken ?= null
-    }
+
+    var FreshAccessToken:AccessToken ?= null
 
     private val Response.retryCount: Int
         get() {
@@ -31,7 +30,7 @@ class TokenRefreshAuthenticator(
 
     private fun Response.createSignedRequest(): Request? = try {
         authorizationRepository.refreshToken {
-                 FreshAccessToken = it
+            FreshAccessToken = it
         }
         Log.e("AUTHENTICATOR FRESH ACCESTOKEN:","$FreshAccessToken")
         request.signWithToken(FreshAccessToken!!)

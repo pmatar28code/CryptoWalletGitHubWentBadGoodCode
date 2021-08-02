@@ -6,17 +6,16 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object UserNetwork {
     //private val logger = HttpLoggingInterceptor()
      //   .setLevel(HttpLoggingInterceptor.Level.BODY )
     private val accessTokenProvider = AccessTokenProviderImp()
-    private val accessTokenInterceptor = AccessTokenInterceptor(accessTokenProvider)
+    private val accessTokenInterceptor = TokenAuthorizationInterceptor(accessTokenProvider)
     val client = OkHttpClient.Builder()
         .addNetworkInterceptor(accessTokenInterceptor)
-        .authenticator(AccessTokenAuthenticator(accessTokenProvider))
+        .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
         .build()
     val coinBaseClienApiCalls:CoinBaseClienApiCalls
         get(){
@@ -31,7 +30,7 @@ object UserNetwork {
     private class UserCallBack(
         private val onSuccess:(UserData.Data) -> Unit): Callback<UserData> {
         override fun onResponse(call: Call<UserData>, response: Response<UserData>) {
-            Log.e("ON Response User:"," ${response.body()?.data?.name}")
+            Log.e("ON Response User:"," ${response.body()?.data?.name} ok? ${response.isSuccessful}")
             val newClient = UserData.Data(
                 name = response.body()?.data?.name?:"",
                 avatarUrl = response.body()?.data?.avatarUrl?:"",
@@ -53,19 +52,10 @@ object UserNetwork {
     }
 
     fun getUser (onSuccess: (UserData.Data) -> Unit){
-        var token = if(Repository.accessToken != ""){
-            Repository.accessToken
+        var token = accessTokenProvider.token()?.access_token ?:""
+        Log.e("ON ACTUAL USER NETWORk CALL TOKEN:","$token")
 
-        }else{
-            ""
-        }
-        if(token != ""){
-
-            coinBaseClienApiCalls.getUser("Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
-        }else{
-            Log.e("ACCESS TOKEN IN REPOSITORY","${Repository.accessToken}")
-        }
-
+        coinBaseClienApiCalls.getUser("$token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
     }
 
 }

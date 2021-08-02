@@ -8,6 +8,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.room.RoomDatabase
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
         const val MY_CLIENT_ID = "e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f"
         const val CLIENT_SECRET = "84e2a6a63dc56f5d5be617f77cf71c0c4069a7e3a49cb9e2ce7e5d2bddea007f"
         const val MY_REDIRECT_URI = "cryptowallet://callback"
+        lateinit var ROOM_DATABASE:CoinBaseDatabase
     }
     var accessToken:AccessTokenDCLass?=null
     var database:CoinBaseDatabase ?= null
@@ -38,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         database = CoinBaseDatabase.getInstance(applicationContext)
+        ROOM_DATABASE = database as CoinBaseDatabase
 
         CoroutineScope(IO).launch {
             testingCodeList = getCode()
@@ -51,6 +54,7 @@ class MainActivity : AppCompatActivity() {
                 startActivity(intent)
                 Log.e("FIRST Run", "getting the code")
             } else {
+                Repository.accessToken = testingTokenList!![0]
                 Log.e("WHATS NEXT", "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${testingTokenList?.get(0)}")
 
                 UserNetwork.getUser {
@@ -86,16 +90,26 @@ class MainActivity : AppCompatActivity() {
             accessTokenCall.enqueue(object: Callback<AccessToken> {
                 override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
                     Toast.makeText(this@MainActivity,"good response: ${response.body()?.access_token}",Toast.LENGTH_SHORT).show()
+                    var accessTokenRegular = AccessToken(
+                        access_token =  response.body()?.access_token?:"",
+                        token_type =  response.body()?.token_type?:"",
+                        expires_in = response.body()?.expires_in?:0,
+                        refresh_token = response.body()?.refresh_token?:"",
+                        scope =  response.body()?.scope?:""
+                    )
                     accessToken= AccessTokenDCLass(
-                        access_token =  response.body()?.access_token!!,
-                        token_type =  response.body()?.token_type!!,
-                        expires_in = response.body()?.expires_in!!,
-                        refresh_token = response.body()?.refresh_token!!,
-                        scope =  response.body()?.scope!!
+                        access_token =  response.body()?.access_token?:"",
+                        token_type =  response.body()?.token_type?:"",
+                        expires_in = response.body()?.expires_in?:0,
+                        refresh_token = response.body()?.refresh_token?:"",
+                        scope =  response.body()?.scope?:""
                     )
                     if(accessToken != null) {
+                        //CoroutineScope(IO).launch{
+                          //  deleteActualToken()
+                        //}
                         addToken(accessToken!!)
-                        Repository.accessToken = accessToken?.access_token?:""
+                        Repository.accessToken = accessToken
                         Log.e("ADDED TOKEN TO DATABASE","ACCESS TOKEN ADDED TO DATABASE $accessToken")
                         val intent =Intent(this@MainActivity, MainActivity::class.java)
                         startActivity(intent)
@@ -147,4 +161,22 @@ class MainActivity : AppCompatActivity() {
         var justCode = JustCode(code = code)
         database?.JustCodeDao()?.addCode(justCode)
     }
+
+    private suspend fun deleteActualToken() {
+        var actualToken:AccessTokenDCLass ?=null
+        getTokenDatabase {
+            actualToken = it
+        }
+        Log.e("Actual token for delete", "$actualToken")
+        var database = MainActivity.ROOM_DATABASE
+        database.AccessTokenDao().removeToken(actualToken?.key)
+    }
+
+    private suspend fun getTokenDatabase(tokenCallBack:(AccessTokenDCLass)-> Unit) {
+        var database = MainActivity.ROOM_DATABASE
+        var listTokens = database.AccessTokenDao().getAllTokens()
+        tokenCallBack(listTokens[0])
+    }
+
+
 }

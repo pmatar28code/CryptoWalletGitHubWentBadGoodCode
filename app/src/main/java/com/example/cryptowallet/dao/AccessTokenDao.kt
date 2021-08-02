@@ -12,4 +12,8 @@ interface AccessTokenDao {
 
     @Query("SELECT * FROM AccessTokenDClass")
     fun getAllTokens(): List<AccessTokenDCLass>
+
+    @Query("DELETE FROM AccessTokenDClass WHERE 'key' = :key")
+    fun removeToken(key:Int?)
+
 }

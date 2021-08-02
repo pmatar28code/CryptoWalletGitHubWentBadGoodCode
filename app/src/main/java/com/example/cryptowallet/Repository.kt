@@ -1,5 +1,5 @@
 package com.example.cryptowallet
 
 object Repository {
-    var accessToken =""
+    var accessToken:AccessTokenDCLass ?= null
 }

@@ -14,7 +14,7 @@ import retrofit2.http.POST
             val userId =Repository.userId
             var accountId = Repository.accountId
             var clientId = "e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f"
-            const val postValue = "v2/accounts/\$accountId/addresses"
+            const val postValue = "v2/accounts/0b125b64-619e-5cf8-a719-963534b52bca/addresses"
         }
 
        // @Headers("Accept: application/json")

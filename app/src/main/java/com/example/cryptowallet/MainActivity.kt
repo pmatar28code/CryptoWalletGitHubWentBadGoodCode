@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity() {
             if (testingCodeList!!.isEmpty()) {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaccounts%3Aread")
+                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaccounts%3Aread+wallet%3Aaddresses%3Acreate")
                 )
                 startActivity(intent)
                 Log.e("FIRST Run", "getting the code")
@@ -79,7 +79,9 @@ class MainActivity : AppCompatActivity() {
                     //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
                 }
 
-                //AddressNetwork.getAddresses {  }
+                AddressNetwork.getAddresses {
+                    Log.e("CREATE ADDRESS MAIN: ","${it.address} , ${it.name} , ${it.createdAt}")
+                }
 
             }
 

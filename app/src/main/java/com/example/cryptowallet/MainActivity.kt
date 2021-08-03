@@ -1,5 +1,6 @@
 package com.example.cryptowallet
 
+import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
@@ -10,9 +11,9 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.room.RoomDatabase
 import com.example.cryptowallet.databinding.ActivityMainBinding
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
+import okhttp3.internal.wait
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -41,27 +42,48 @@ class MainActivity : AppCompatActivity() {
 
         database = CoinBaseDatabase.getInstance(applicationContext)
         ROOM_DATABASE = database as CoinBaseDatabase
+        runBlocking {
+            val job:Job = launch(IO) {
+                testingCodeList = database?.JustCodeDao()?.getAllCodes()
+                testingTokenList = database?.AccessTokenDao()?.getAllTokens()
+                joinAll()
+            }
+        }
 
-        CoroutineScope(IO).launch {
-            testingCodeList = getCode()
-            testingTokenList = getAllTokens()
 
             if (testingCodeList!!.isEmpty()) {
                 val intent = Intent(
                     Intent.ACTION_VIEW,
-                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Auser%3Aread")
+                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaccounts%3Aread")
                 )
                 startActivity(intent)
                 Log.e("FIRST Run", "getting the code")
             } else {
                 Repository.accessToken = testingTokenList!![0]
-                Log.e("WHATS NEXT", "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${testingTokenList?.get(0)}")
+                Log.e(
+                    "WHATS NEXT",
+                    "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${
+                        testingTokenList?.get(0)
+                    }"
+                )
 
                 UserNetwork.getUser {
-                    Log.e("SHOWING USER","${it.name}")
+                    Log.e("SHOWING USER", "${it.name}, id: ${it.id}")
+                    Repository.userId = it.id.toString()
                 }
+
+                ListAccountsNetwork.getAccounts {
+                    Repository.accountId = it[0].id?:""
+                    Log.e("LIST OF ACCOUNTS MAIN OJO: ","ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency}")
+                   // Repository.accountId = it.id.toString()
+                    //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
+                }
+
+                //AddressNetwork.getAddresses {  }
+
             }
-        }
+
+
     }
 
     override fun onResume() {
@@ -176,6 +198,17 @@ class MainActivity : AppCompatActivity() {
         var database = MainActivity.ROOM_DATABASE
         var listTokens = database.AccessTokenDao().getAllTokens()
         tokenCallBack(listTokens[0])
+    }
+
+    private suspend fun populateCodeList(codeListCallBack:(List<JustCode>)->Unit){
+        var codeListFormDatabase = database?.JustCodeDao()
+        codeListFormDatabase?.getAllCodes()?.let { codeListCallBack(it) }
+
+    }
+
+    private suspend fun populateTokenList(tokenListCallBack:(List<AccessTokenDCLass>)->Unit){
+        var tokenListFormDatabase = database?.AccessTokenDao()
+        tokenListFormDatabase?.getAllTokens()?.let { tokenListCallBack(it) }
     }
 
 

@@ -1,21 +1,26 @@
 package com.example.cryptowallet
 
-import android.app.Application
 import android.util.Log
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.launch
 
-class AccessTokenProviderImp :AccessTokenProvider, Application() {
+class AccessTokenProviderImp :AccessTokenProvider {
 
     var token: AccessTokenDCLass?=null
 
     override fun token(): AccessTokenDCLass? {
-        CoroutineScope(IO).launch {
-            getTokenDatabase {
-                token = it
+        runBlocking {
+            val job:Job = launch(IO){
+                getTokenDatabase {
+                    token = it
+                }
             }
         }
+        //CoroutineScope(IO).launch {
+           // getTokenDatabase {
+             //   token = it
+           // }
+        //}
         Log.e("TOKEN ACCESS TOKEN PROV", "$token")
         return token
     }
@@ -29,13 +34,21 @@ class AccessTokenProviderImp :AccessTokenProvider, Application() {
                 scope = it.scope,
                 token_type = it.token_type
             )
-            CoroutineScope(IO).launch {
-                if(newAccessToken.access_token !=""){
-                    deleteActualToken()
-                    addNewToken(newAccessToken)
+            runBlocking {
+                val job: Job = launch(IO){
+                    if(newAccessToken.access_token !=""){
+                        deleteActualToken()
+                        addNewToken(newAccessToken)
+                    }
+                    joinAll()
                 }
-
             }
+            //CoroutineScope(IO).launch {
+             //   if(newAccessToken.access_token !=""){
+                //    deleteActualToken()
+                //    addNewToken(newAccessToken)
+                //}
+            //}
             Log.e("NEWLY REFRESHED TOKEN IMP","$newAccessToken")
             refreshCallBack(it)
         }

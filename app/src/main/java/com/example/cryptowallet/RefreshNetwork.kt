@@ -14,10 +14,9 @@ object RefreshNetwork {
     //private val logger = HttpLoggingInterceptor()
     //   .setLevel(HttpLoggingInterceptor.Level.BODY )
     private val accessTokenProvider = AccessTokenProviderImp()
-    private val accessTokenInterceptor = TokenAuthorizationInterceptor(accessTokenProvider)
     val client = OkHttpClient()
-        //.addNetworkInterceptor(accessTokenInterceptor)
-        //.authenticator(AccessTokenAuthenticator(accessTokenProvider))
+        //.addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
+       // .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
         //.build()
 
         val refreshTokenApi:RefreshTokenApi

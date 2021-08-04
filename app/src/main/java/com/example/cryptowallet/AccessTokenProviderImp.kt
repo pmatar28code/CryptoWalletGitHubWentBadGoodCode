@@ -11,9 +11,9 @@ class AccessTokenProviderImp :AccessTokenProvider {
     override fun token(): AccessTokenDCLass? {
         runBlocking {
             val job:Job = launch(IO){
-                getTokenDatabase {
-                    token = it
-                }
+                var database = MainActivity.ROOM_DATABASE.AccessTokenDao()
+                var listOfTokens = database.getAllTokens()
+                token = listOfTokens[0]
             }
         }
         //CoroutineScope(IO).launch {

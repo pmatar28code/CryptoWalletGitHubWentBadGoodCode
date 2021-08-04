@@ -35,8 +35,8 @@ class TokenRefreshAuthenticatorCoinBase(
                 // Retry the request with the new token.
                 return response.request
                     .newBuilder()
-                    .removeHeader("Authorization")
-                    .addHeader("Authorization", "Bearer ${updatedToken?.access_token}")
+                    //.removeHeader("Authorization")
+                    .header("Authorization", "Bearer ${updatedToken?.access_token}")
                     .build()
             }
         }

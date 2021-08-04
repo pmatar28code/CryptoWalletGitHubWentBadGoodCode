@@ -11,8 +11,8 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 object ShowAddressNetwork {
     private val accessTokenProvider = AccessTokenProviderImp()
     val client = OkHttpClient.Builder()
-        .addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
-        .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
+        //.addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
+        .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
     val showAddressApi: ShowAddressApi
         get() {
@@ -54,6 +54,6 @@ object ShowAddressNetwork {
     fun getAddresses(onSuccess: (ShowAddresses.Data) -> Unit) {
         var token = AccessTokenProviderImp().token()?.access_token ?: ""
         Log.e("On Actual ADDRESS NETWORK TOKEN:", "$token")
-        showAddressApi.getAddress("$token").enqueue(AddressCallBack(onSuccess))
+        showAddressApi.getAddress("Bearer $token").enqueue(AddressCallBack(onSuccess))
     }
 }

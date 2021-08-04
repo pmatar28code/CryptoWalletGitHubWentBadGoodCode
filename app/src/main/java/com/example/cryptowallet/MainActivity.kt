@@ -19,6 +19,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -82,6 +83,19 @@ class MainActivity : AppCompatActivity() {
                 AddressNetwork.getAddresses {
                     Log.e("CREATE ADDRESS MAIN: ","${it.address} , ${it.name} , ${it.createdAt}")
                 }
+
+                //AccessTokenProviderImp().refreshToken {
+                  //  Log.e("USING IMP ON MAIN FOR REFRESH","${it.access_token}")
+               // }
+
+               // runBlocking {
+                  //  var job:Job = launch(IO){
+                    //    revokeToken()
+                   // joinAll()
+                   // }
+                //}
+
+
 
             }
 
@@ -213,5 +227,27 @@ class MainActivity : AppCompatActivity() {
         tokenListFormDatabase?.getAllTokens()?.let { tokenListCallBack(it) }
     }
 
+    private fun revokeToken(){
+        var databaseRevoke =  database?.AccessTokenDao()?.getAllTokens()?.get(0)?.refresh_token!!
+        var retrofitBuilder = Retrofit.Builder()
+            .baseUrl("https://api.coinbase.com/")
+            .addConverterFactory(MoshiConverterFactory.create())
+        val retrofit = retrofitBuilder.build()
+        val revokeTokenClient = retrofit.create(RevokeTokenApi::class.java)
+        val revokeCall = revokeTokenClient.revokeToken(
+            databaseRevoke,
+            "Bearer $databaseRevoke "
+        )
+        revokeCall.enqueue(object:Callback<Void>{
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                Log.e("IS IT REVOKED MAIN ON RESPONSE","${response.body()}")
+            }
 
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                Log.e("ON FAILURE REVOKE","$t")
+            }
+
+        })
+
+    }
 }

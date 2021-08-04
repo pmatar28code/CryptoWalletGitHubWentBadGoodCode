@@ -12,8 +12,8 @@ object AddressNetwork {
 
     private val accessTokenProvider = AccessTokenProviderImp()
     val client = OkHttpClient.Builder()
-        .addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
-        .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
+        //.addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
+        .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
     val addressApi: AddressApi
         get() {
@@ -55,7 +55,7 @@ object AddressNetwork {
     fun getAddresses(onSuccess: (NAddress.Data) -> Unit) {
         var token = AccessTokenProviderImp().token()?.access_token ?: ""
         Log.e("On Actual ADDRESS NETWORK TOKEN:", "$token")
-        addressApi.getAddress("$token").enqueue(AddressCallBack(onSuccess))
+        addressApi.getAddress("Bearer $token").enqueue(AddressCallBack(onSuccess))
     }
 }
 

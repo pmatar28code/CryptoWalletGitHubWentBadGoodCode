@@ -37,7 +37,7 @@ class AccessTokenProviderImp :AccessTokenProvider {
             runBlocking {
                 val job: Job = launch(IO){
                     if(newAccessToken.access_token !=""){
-                        deleteActualToken()
+                        deleteAllTokens()
                         addNewToken(newAccessToken)
                     }
                     joinAll()
@@ -75,5 +75,10 @@ class AccessTokenProviderImp :AccessTokenProvider {
 
         database.AccessTokenDao().addToken(newToken)
         Log.e("NEW TOKEN ADDED IMP","$newToken")
+    }
+
+    private suspend fun deleteAllTokens(){
+        var database = MainActivity.ROOM_DATABASE.AccessTokenDao()
+        database.deleteAllTokens()
     }
 }

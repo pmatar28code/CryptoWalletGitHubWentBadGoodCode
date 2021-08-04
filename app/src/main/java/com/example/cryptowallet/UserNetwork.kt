@@ -14,8 +14,8 @@ object UserNetwork {
     private val accessTokenProvider = AccessTokenProviderImp()
     private val accessTokenInterceptor = TokenAuthorizationInterceptor(accessTokenProvider)
     val client = OkHttpClient.Builder()
-        .addNetworkInterceptor(accessTokenInterceptor)
-        .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
+        //.addNetworkInterceptor(accessTokenInterceptor)
+        .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
     val coinBaseClienApiCalls:CoinBaseClienApiCalls
         get(){
@@ -55,7 +55,7 @@ object UserNetwork {
         var token = accessTokenProvider.token()?.access_token ?:""
         Log.e("ON ACTUAL USER NETWORk CALL TOKEN:","$token")
 
-        coinBaseClienApiCalls.getUser("$token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
+        coinBaseClienApiCalls.getUser("Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
     }
 
 }

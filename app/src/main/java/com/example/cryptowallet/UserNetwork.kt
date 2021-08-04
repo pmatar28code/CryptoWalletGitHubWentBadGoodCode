@@ -14,7 +14,7 @@ object UserNetwork {
     private val accessTokenProvider = AccessTokenProviderImp()
     private val accessTokenInterceptor = TokenAuthorizationInterceptor(accessTokenProvider)
     val client = OkHttpClient.Builder()
-        //.addNetworkInterceptor(accessTokenInterceptor)
+        .addNetworkInterceptor(accessTokenInterceptor)
         .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
     val coinBaseClienApiCalls:CoinBaseClienApiCalls

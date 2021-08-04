@@ -12,7 +12,7 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 object ListAccountsNetwork {
     private val accessTokenProvider = AccessTokenProviderImp()
     val client = OkHttpClient.Builder()
-        //.addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
+        .addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
         .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
     val listAccountsApi: ListAccountsApi

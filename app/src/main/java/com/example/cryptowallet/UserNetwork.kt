@@ -13,18 +13,18 @@ object UserNetwork {
      //   .setLevel(HttpLoggingInterceptor.Level.BODY )
     private val accessTokenProvider = AccessTokenProviderImp()
     private val accessTokenInterceptor = TokenAuthorizationInterceptor(accessTokenProvider)
-    val client = OkHttpClient.Builder()
+    private val client = OkHttpClient.Builder()
         .addNetworkInterceptor(accessTokenInterceptor)
         .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
-    val coinBaseClienApiCalls:CoinBaseClienApiCalls
+    private val coinBaseClientApiCalls:CoinBaseClientApiCalls
         get(){
             return Retrofit.Builder()
                 .baseUrl("https://api.coinbase.com/")
                 .client(client)
                 .addConverterFactory(MoshiConverterFactory.create())
                 .build()
-                .create(CoinBaseClienApiCalls::class.java)
+                .create(CoinBaseClientApiCalls::class.java)
         }
 
     private class UserCallBack(
@@ -45,17 +45,14 @@ object UserNetwork {
             Log.e("RESPONDED WITH:","Client: ${newClient.name},${newClient.id} ${response.isSuccessful}")
             onSuccess(newClient)
         }
-
         override fun onFailure(call: Call<UserData>, t: Throwable) {
             Log.e("On Failure Address:","$t")
         }
     }
-
     fun getUser (onSuccess: (UserData.Data) -> Unit){
-        var token = accessTokenProvider.token()?.access_token ?:""
-        Log.e("ON ACTUAL USER NETWORk CALL TOKEN:","$token")
+        val token = accessTokenProvider.token()?.access_token ?:""
+        Log.e("ON ACTUAL USER NETWORk CALL TOKEN:", token)
 
-        coinBaseClienApiCalls.getUser("Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
+        coinBaseClientApiCalls.getUser("Bearer $token").enqueue(UserCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
     }
-
 }

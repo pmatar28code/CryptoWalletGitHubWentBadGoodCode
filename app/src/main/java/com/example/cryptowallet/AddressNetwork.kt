@@ -9,13 +9,12 @@ import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 object AddressNetwork {
-
     private val accessTokenProvider = AccessTokenProviderImp()
-    val client = OkHttpClient.Builder()
+    private val client = OkHttpClient.Builder()
         .addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
         .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
-    val addressApi: AddressApi
+    private val addressApi: AddressApi
         get() {
             return Retrofit.Builder()
                 .baseUrl("https://api.coinbase.com/")
@@ -53,8 +52,8 @@ object AddressNetwork {
     }
 
     fun getAddresses(onSuccess: (NAddress.Data) -> Unit) {
-        var token = AccessTokenProviderImp().token()?.access_token ?: ""
-        Log.e("On Actual ADDRESS NETWORK TOKEN:", "$token")
+        val token = AccessTokenProviderImp().token()?.access_token ?: ""
+        Log.e("On Actual ADDRESS NETWORK TOKEN:", token)
         addressApi.getAddress("Bearer $token").enqueue(AddressCallBack(onSuccess))
     }
 }

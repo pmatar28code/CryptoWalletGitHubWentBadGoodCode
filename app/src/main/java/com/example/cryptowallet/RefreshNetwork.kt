@@ -14,21 +14,19 @@ object RefreshNetwork {
     //private val logger = HttpLoggingInterceptor()
     //   .setLevel(HttpLoggingInterceptor.Level.BODY )
     private val accessTokenProvider = AccessTokenProviderImp()
-    val client = OkHttpClient()
+    private val client = OkHttpClient() //.Builder()
         //.addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
        // .authenticator(TokenRefreshAuthenticator(accessTokenProvider))
         //.build()
-
-        val refreshTokenApi:RefreshTokenApi
-            get(){
-            return Retrofit.Builder()
-                .baseUrl("https://api.coinbase.com/")
-                .client(client)
-                .addConverterFactory(MoshiConverterFactory.create())
-                .build()
-                .create(RefreshTokenApi::class.java)
-        }
-
+    private val refreshTokenApi:RefreshTokenApi
+    get(){
+        return Retrofit.Builder()
+            .baseUrl("https://api.coinbase.com/")
+            .client(client)
+            .addConverterFactory(MoshiConverterFactory.create())
+            .build()
+            .create(RefreshTokenApi::class.java)
+    }
     private class RefreshCallBack(
         private val onSuccess:(AccessToken) -> Unit): Callback<AccessToken> {
         override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
@@ -50,7 +48,7 @@ object RefreshNetwork {
                     }
                 }
             }
-            Log.e("RESPONDED WITH:","RefresehedToken: ${newRefreshedToken?.access_token}, ${response.isSuccessful}")
+            Log.e("RESPONDED WITH:","RefreshedToken: ${newRefreshedToken?.access_token}, ${response.isSuccessful}")
             if (newRefreshedToken != null) {
                 onSuccess(newRefreshedToken)
             }
@@ -62,12 +60,8 @@ object RefreshNetwork {
     }
 
     fun refreshToken (onSuccess: (AccessToken) -> Unit){
-        var refreshToken = AccessTokenProviderImp().token()?.refresh_token?:""
-        Log.e("REFRESH NETWORK REFRESh TOKEN FROM Actual TOKEN:","$refreshToken")
-
-        refreshTokenApi.refreshToken("refresh_token", MY_CLIENT_ID, CLIENT_SECRET,refreshToken).enqueue(RefreshCallBack(onSuccess)) //getUser(token).enqueue(AddressCallBack(onSuccess))
-
-
+        val refreshToken = AccessTokenProviderImp().token()?.refresh_token?:""
+        Log.e("REFRESH NETWORK REFRESH TOKEN FROM Actual TOKEN:", refreshToken)
+        refreshTokenApi.refreshToken("refresh_token", MY_CLIENT_ID, CLIENT_SECRET,refreshToken).enqueue(RefreshCallBack(onSuccess))
     }
-
 }

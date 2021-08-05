@@ -44,7 +44,6 @@ data class ListAccounts(
             val currency: String?
         )
     }
-
     @JsonClass(generateAdapter = true)
     data class Pagination(
         @Json(name = "ending_before")

@@ -12,10 +12,9 @@ class TokenAuthorizationInterceptor(
         val newRequest = chain.request().signedRequest()
         return chain.proceed(newRequest)
     }
-
     private fun Request.signedRequest(): Request {
         val accessToken = authorizationRepository.token()?.access_token?:""
-        Log.e("ACCESS TOKEN INTERCEPTOR","$accessToken")
+        Log.e("ACCESS TOKEN INTERCEPTOR", accessToken)
         return newBuilder()
             .header("Authorization", "Bearer $accessToken")
             .build()

@@ -12,7 +12,6 @@ import com.example.cryptowallet.dao.JustCodeDao
     version = 2
 )
 abstract class CoinBaseDatabase: RoomDatabase(){
-
     abstract fun AccessTokenDao(): AccessTokenDao
     abstract fun JustCodeDao(): JustCodeDao
 
@@ -24,7 +23,6 @@ abstract class CoinBaseDatabase: RoomDatabase(){
         fun getInstance(context: Context): CoinBaseDatabase {
             synchronized(this) {
                 var instance = INSTANCE
-
                 if (instance == null) {
                     instance = Room.databaseBuilder(
                         context.applicationContext,

@@ -10,11 +10,11 @@ import retrofit2.converter.moshi.MoshiConverterFactory
 
 object ShowAddressNetwork {
     private val accessTokenProvider = AccessTokenProviderImp()
-    val client = OkHttpClient.Builder()
+    private val client = OkHttpClient.Builder()
         .addNetworkInterceptor(TokenAuthorizationInterceptor(accessTokenProvider))
         .authenticator(TokenRefreshAuthenticatorCoinBase(accessTokenProvider))
         .build()
-    val showAddressApi: ShowAddressApi
+    private val showAddressApi: ShowAddressApi
         get() {
             return Retrofit.Builder()
                 .baseUrl("https://api.coinbase.com/")
@@ -52,8 +52,8 @@ object ShowAddressNetwork {
     }
 
     fun getAddresses(onSuccess: (ShowAddresses.Data) -> Unit) {
-        var token = AccessTokenProviderImp().token()?.access_token ?: ""
-        Log.e("On Actual ADDRESS NETWORK TOKEN:", "$token")
+        val token = AccessTokenProviderImp().token()?.access_token ?: ""
+        Log.e("On Actual ADDRESS NETWORK TOKEN:", token)
         showAddressApi.getAddress("Bearer $token").enqueue(AddressCallBack(onSuccess))
     }
 }

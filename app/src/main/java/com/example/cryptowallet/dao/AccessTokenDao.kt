@@ -18,5 +18,4 @@ interface AccessTokenDao {
 
     @Query("DELETE FROM AccessTokenDClass")
     fun deleteAllTokens()
-
 }

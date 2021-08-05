@@ -38,8 +38,6 @@ class TokenRefreshAuthenticatorCoinBase(
 
                     }
                 }
-
-
                 // Retry the request with the new token.
                 return response.request
                     .newBuilder()

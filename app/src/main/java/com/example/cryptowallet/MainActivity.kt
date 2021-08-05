@@ -1,6 +1,5 @@
 package com.example.cryptowallet
 
-import android.app.Application
 import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
@@ -9,11 +8,9 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.room.RoomDatabase
 import com.example.cryptowallet.databinding.ActivityMainBinding
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
-import okhttp3.internal.wait
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -30,7 +27,6 @@ class MainActivity : AppCompatActivity() {
     }
     var accessToken:AccessTokenDCLass?=null
     var database:CoinBaseDatabase ?= null
-    //var tokenList:List<AccessTokenDCLass> ?=null
     var token:String ?= ""
     var testingCodeList:List<JustCode>?=null
     var testingTokenList:List<AccessTokenDCLass>?=null
@@ -52,77 +48,65 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-            if (testingCodeList!!.isEmpty()) {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaccounts%3Aread+wallet%3Aaddresses%3Acreate")
-                )
-                startActivity(intent)
-                Log.e("FIRST Run", "getting the code")
-            } else {
-                Repository.accessToken = testingTokenList!![0]
-                Log.e(
-                    "WHATS NEXT",
-                    "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)?.code}, Token:${
-                        testingTokenList?.get(0)?.access_token
-                    }"
-                )
-
-                UserNetwork.getUser {
-                    runBlocking {
-                        var job:Job = launch(IO) {
-                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
-                            Log.e("SHOWING USER", "${it.name}, id: ${it.id} WITH TOKEN = ${token?.access_token}")
-                            Repository.userId = it.id.toString()
-                            //joinAll()
-                        }
+        if (testingCodeList!!.isEmpty()) {
+            val intent = Intent(
+                Intent.ACTION_VIEW,
+                Uri.parse("https://www.coinbase.com/oauth/authorize?client_id=e4faf6ec45843a2f1e8a42c6242f3d8e82ce5603d3ee9c86c85be29a6361104f&redirect_uri=cryptowallet%3A%2F%2Fcallback&response_type=code&scope=wallet%3Aaccounts%3Aread+wallet%3Aaddresses%3Acreate")
+            )
+            startActivity(intent)
+            Log.e("FIRST Run", "getting the code")
+        } else {
+            Repository.accessToken = testingTokenList!![0]
+            Log.e(
+                "WHATS NEXT",
+                "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)?.code}, Token:${
+                    testingTokenList?.get(0)?.access_token
+                }"
+            )
+            UserNetwork.getUser {
+                runBlocking {
+                    var job:Job = launch(IO) {
+                        val token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                        Log.e("SHOWING USER", "${it.name}, id: ${it.id} WITH TOKEN = ${token?.access_token}")
+                        Repository.userId = it.id.toString()
                     }
                 }
-
-                ListAccountsNetwork.getAccounts {
-                    Repository.accountId = it[0].id?:""
-                    runBlocking {
-                        var job:Job = launch(IO) {
-                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
-                            Log.e(
-                                "LIST OF ACCOUNTS MAIN OJO: ",
-                                "ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency} WITH TOKEN = ${token?.access_token}"
-                            )
-                            //joinAll()
-                            // Repository.accountId = it.id.toString()
-                        }   //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
+            }
+            ListAccountsNetwork.getAccounts {
+                Repository.accountId = it[0].id?:""
+                runBlocking {
+                    var job:Job = launch(IO) {
+                        var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                        Log.e(
+                            "LIST OF ACCOUNTS MAIN OJO: ",
+                            "ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency} WITH TOKEN = ${token?.access_token}"
+                        )
                     }
                 }
-
-                AddressNetwork.getAddresses {
-                    runBlocking {
-                        var job: Job = launch(IO) {
-                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
-                            Log.e(
-                                "CREATE ADDRESS MAIN: ",
-                                "${it.address} , ${it.name} , ${it.createdAt} , WITH TOKEN = ${token?.access_token}"
-                            )
-                            //joinAll()
-                        }
+            }
+            AddressNetwork.getAddresses {
+                runBlocking {
+                    var job: Job = launch(IO) {
+                        var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                        Log.e(
+                            "CREATE ADDRESS MAIN: ",
+                            "${it.address} , ${it.name} , ${it.createdAt} , WITH TOKEN = ${token?.access_token}"
+                        )
                     }
                 }
-
-                //AccessTokenProviderImp().refreshToken {
-                  //  Log.e("USING IMP ON MAIN FOR REFRESH","${it.access_token}")
-               // }
-
-               // runBlocking {
-                  //  var job:Job = launch(IO){
-                    //    revokeToken()
-                   // joinAll()
-                   // }
-                //}
-
-
-
             }
 
+        //AccessTokenProviderImp().refreshToken {
+        //  Log.e("USING IMP ON MAIN FOR REFRESH","${it.access_token}")
+        // }
 
+        // runBlocking {
+        //  var job:Job = launch(IO){
+        //    revokeToken()
+        // joinAll()
+        // }
+        //}
+        }
     }
 
     override fun onResume() {
@@ -240,19 +224,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private suspend fun populateCodeList(codeListCallBack:(List<JustCode>)->Unit){
-        var codeListFormDatabase = database?.JustCodeDao()
+        val codeListFormDatabase = database?.JustCodeDao()
         codeListFormDatabase?.getAllCodes()?.let { codeListCallBack(it) }
 
     }
 
     private suspend fun populateTokenList(tokenListCallBack:(List<AccessTokenDCLass>)->Unit){
-        var tokenListFormDatabase = database?.AccessTokenDao()
+        val tokenListFormDatabase = database?.AccessTokenDao()
         tokenListFormDatabase?.getAllTokens()?.let { tokenListCallBack(it) }
     }
 
     private fun revokeToken(){
-        var databaseRevoke =  database?.AccessTokenDao()?.getAllTokens()?.get(0)?.refresh_token!!
-        var retrofitBuilder = Retrofit.Builder()
+        val databaseRevoke =  database?.AccessTokenDao()?.getAllTokens()?.get(0)?.refresh_token!!
+        val retrofitBuilder = Retrofit.Builder()
             .baseUrl("https://api.coinbase.com/")
             .addConverterFactory(MoshiConverterFactory.create())
         val retrofit = retrofitBuilder.build()

@@ -1,7 +1,6 @@
 package com.example.cryptowallet
 
 interface AccessTokenProvider {
-
     /**
      * Returns an access token. In the event that you don't have a token return null.
      */

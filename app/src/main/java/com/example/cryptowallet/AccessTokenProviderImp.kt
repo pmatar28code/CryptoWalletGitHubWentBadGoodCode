@@ -10,23 +10,17 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class AccessTokenProviderImp :AccessTokenProvider {
-
     var token: AccessTokenDCLass?=null
     var newAccessToken:AccessTokenDCLass?=null
 
     override fun token(): AccessTokenDCLass? {
         runBlocking {
             val job: Job = launch(IO) {
-                var database = MainActivity.ROOM_DATABASE.AccessTokenDao()
-                var listOfTokens = database.getAllTokens()
+                val database = MainActivity.ROOM_DATABASE.AccessTokenDao()
+                val listOfTokens = database.getAllTokens()
                 token = listOfTokens[0]
             }
         }
-        //CoroutineScope(IO).launch {
-        // getTokenDatabase {
-        //   token = it
-        // }
-        //}
         /*
         if (newAccessToken == null){
             token?.access_token = "1"
@@ -42,7 +36,6 @@ class AccessTokenProviderImp :AccessTokenProvider {
     }
 
     override fun refreshToken(refreshCallback: (Boolean) -> Unit) {
-
         val retrofitBuilder = Retrofit.Builder()
             .baseUrl("https://api.coinbase.com/")
             .addConverterFactory(GsonConverterFactory.create())
@@ -59,7 +52,7 @@ class AccessTokenProviderImp :AccessTokenProvider {
         refreshTokenCall?.enqueue(object: Callback<AccessToken>{
             override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
                 Log.e("GOOD RESPONSE IMP:", "TOKEN: ${response.body()?.access_token}")
-                     newAccessToken = AccessTokenDCLass(
+                newAccessToken = AccessTokenDCLass(
                     access_token = response.body()?.access_token ?: "",
                     expires_in = response.body()?.expires_in ?: 0,
                     refresh_token = response.body()?.refresh_token ?: "",
@@ -68,9 +61,8 @@ class AccessTokenProviderImp :AccessTokenProvider {
                 )
                 if (newAccessToken!!.access_token != "" && newAccessToken != null){
                     runBlocking {
-
                         val job: Job = launch(IO) {
-                            var database = MainActivity.ROOM_DATABASE.AccessTokenDao()
+                            val database = MainActivity.ROOM_DATABASE.AccessTokenDao()
                             database.deleteAllTokens()
                             Log.e("NEW ACCESS TOKen ADDED TO DATABASE FROM IMP", "$newAccessToken")
                             database.addToken(newAccessToken!!)
@@ -87,17 +79,12 @@ class AccessTokenProviderImp :AccessTokenProvider {
                 Log.e("ON FAILURE ReFReSH IMP:","$t")
                 refreshCallback(false)
             }
-
         })
-         //Log.e("AccessTOken IMP = :","NULLL")
-        //return null
-
-
     }
 
     private suspend fun getTokenDatabase(tokenCallBack:(AccessTokenDCLass)-> Unit) {
-        var database = MainActivity.ROOM_DATABASE
-        var listTokens = database.AccessTokenDao().getAllTokens()
+        val database = MainActivity.ROOM_DATABASE
+        val listTokens = database.AccessTokenDao().getAllTokens()
         tokenCallBack(listTokens[0])
     }
 
@@ -107,19 +94,19 @@ class AccessTokenProviderImp :AccessTokenProvider {
                 actualToken = it
             }
             Log.e("Actual token for delete", "$actualToken")
-        var database = MainActivity.ROOM_DATABASE
+        val database = MainActivity.ROOM_DATABASE
             database.AccessTokenDao().removeToken(actualToken?.key)
     }
 
     private suspend fun addNewToken(newToken:AccessTokenDCLass){
-        var database = MainActivity.ROOM_DATABASE
+        val database = MainActivity.ROOM_DATABASE
 
         database.AccessTokenDao().addToken(newToken)
         Log.e("NEW TOKEN ADDED IMP","$newToken")
     }
 
     private suspend fun deleteAllTokens(){
-        var database = MainActivity.ROOM_DATABASE.AccessTokenDao()
+        val database = MainActivity.ROOM_DATABASE.AccessTokenDao()
         database.deleteAllTokens()
     }
 }

@@ -1,28 +1,23 @@
 package com.example.cryptowallet
 
-import com.google.gson.annotations.Expose
-import com.google.gson.annotations.SerializedName
+import com.squareup.moshi.Json
+import com.squareup.moshi.JsonClass
 
+@JsonClass(generateAdapter = true)
 data class AccessToken (
-
-    @SerializedName("access_token")
-    @Expose
+    @Json(name= "access_token")
     val access_token:String,
 
-    @SerializedName("token_type")
-    @Expose
+    @Json(name= "token_type")
     val token_type :String,
 
-    @SerializedName("expires_in")
-    @Expose
+    @Json(name = "expires_in")
     val expires_in :Int,
 
-    @SerializedName("refresh_token")
-    @Expose
+    @Json(name= "refresh_token")
     val refresh_token :String,
 
-    @SerializedName("scope")
-    @Expose
+    @Json(name ="scope")
     val scope :String
 )
 

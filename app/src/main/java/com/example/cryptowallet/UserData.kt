@@ -1,31 +1,29 @@
 package com.example.cryptowallet
 
-import com.squareup.moshi.Json
-import com.squareup.moshi.JsonClass
+import com.google.gson.annotations.SerializedName
 
-@JsonClass(generateAdapter = true)
 data class UserData(
-    @Json(name = "data") val data: Data?
+    @SerializedName("data")
+    val data: Data?
 ) {
-    @JsonClass(generateAdapter = true)
     data class Data(
-        @Json(name = "avatarUrl")
+        @SerializedName("avatar_url")
         val avatarUrl: String?,
-        @Json(name ="id")
+        @SerializedName("id")
         val id: String?,
-        @Json(name = "name")
+        @SerializedName("name")
         val name: String?,
-        @Json(name = "profile_bio")
+        @SerializedName("profile_bio")
         val profileBio: Any?,
-        @Json(name = "profile_location")
+        @SerializedName("profile_location")
         val profileLocation: Any?,
-        @Json(name = "profile_url")
+        @SerializedName("profile_url")
         val profileUrl: String?,
-        @Json(name = "resource")
+        @SerializedName("resource")
         val resource: String?,
-        @Json(name = "resource_path")
+        @SerializedName("resource_path")
         val resourcePath: String?,
-        @Json(name = "username")
+        @SerializedName("username")
         val username: String?
     )
 }

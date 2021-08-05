@@ -3,6 +3,7 @@ package com.example.cryptowallet.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.example.cryptowallet.AccessTokenDCLass
 import com.example.cryptowallet.JustCode
 
 @Dao

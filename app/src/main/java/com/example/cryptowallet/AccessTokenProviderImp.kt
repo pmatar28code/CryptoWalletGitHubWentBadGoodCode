@@ -27,6 +27,7 @@ class AccessTokenProviderImp :AccessTokenProvider {
         //   token = it
         // }
         //}
+        /*
         if (newAccessToken == null){
             token?.access_token = "1"
         Log.e("TOKEN ACCESS TOKEN PROV Forced to 1", "$token")
@@ -35,6 +36,9 @@ class AccessTokenProviderImp :AccessTokenProvider {
             Log.e("TOKEN ACCESS TOKEN PROV NOOOTT FORCED", "$token")
             return token
         }
+        */
+        Log.e("RETURNED TOKEN FUN TOKEN IMP:","$token")
+        return token
     }
 
     override fun refreshToken(refreshCallback: (Boolean) -> Unit) {

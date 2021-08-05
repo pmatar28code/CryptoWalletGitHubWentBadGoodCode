@@ -63,8 +63,8 @@ class MainActivity : AppCompatActivity() {
                 Repository.accessToken = testingTokenList!![0]
                 Log.e(
                     "WHATS NEXT",
-                    "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)}, Token:${
-                        testingTokenList?.get(0)
+                    "DO API Requests WITH TOKEN AVAILABLE CODE:${testingCodeList?.get(0)?.code}, Token:${
+                        testingTokenList?.get(0)?.access_token
                     }"
                 )
 
@@ -72,9 +72,9 @@ class MainActivity : AppCompatActivity() {
                     runBlocking {
                         var job:Job = launch(IO) {
                             var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
-                            Log.e("SHOWING USER", "${it.name}, id: ${it.id} WITH TOKEN = $token")
+                            Log.e("SHOWING USER", "${it.name}, id: ${it.id} WITH TOKEN = ${token?.access_token}")
                             Repository.userId = it.id.toString()
-                            joinAll()
+                            //joinAll()
                         }
                     }
                 }
@@ -86,9 +86,9 @@ class MainActivity : AppCompatActivity() {
                             var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
                             Log.e(
                                 "LIST OF ACCOUNTS MAIN OJO: ",
-                                "ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency} WITH TOKEN = $token"
+                                "ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency} WITH TOKEN = ${token?.access_token}"
                             )
-                            joinAll()
+                            //joinAll()
                             // Repository.accountId = it.id.toString()
                         }   //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
                     }
@@ -100,9 +100,9 @@ class MainActivity : AppCompatActivity() {
                             var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
                             Log.e(
                                 "CREATE ADDRESS MAIN: ",
-                                "${it.address} , ${it.name} , ${it.createdAt} , WITH TOKEN = $token"
+                                "${it.address} , ${it.name} , ${it.createdAt} , WITH TOKEN = ${token?.access_token}"
                             )
-                            joinAll()
+                            //joinAll()
                         }
                     }
                 }

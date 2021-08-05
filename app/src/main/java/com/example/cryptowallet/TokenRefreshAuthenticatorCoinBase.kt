@@ -26,11 +26,19 @@ class TokenRefreshAuthenticatorCoinBase(
                         .build()
                 }
 
-                var updatedToken:AccessToken ?= null
-                    tokenProvider.refreshToken {
-                        updatedToken = it
+                var updatedToken: AccessTokenDCLass? = null
+                tokenProvider.refreshToken {
+                    if(it){
+                        updatedToken = MainActivity.ROOM_DATABASE.AccessTokenDao().getAllTokens()[0]
+                        Log.e("NEW UPDATED TOKEN ON AUTHENTICATOR CONBASE","$updatedToken")
+                    }else{
+                        Log.e("RECIEVED FALSE FROM REFRESG ON AUTHENTICATOR COINBASE","FALSE DO NOTHING")
+                        //updatedToken = null
+                        //Log.e("NEW UPDATED TOKEN ON AUTHENTICATOR CONBASE","$updatedToken")
+
                     }
-                Log.e("NEW UPDATED TOKEN ON AUTHENTICATOR CONBASE","$updatedToken")
+                }
+
 
                 // Retry the request with the new token.
                 return response.request

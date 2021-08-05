@@ -33,15 +33,27 @@ object RefreshNetwork {
         private val onSuccess:(AccessToken) -> Unit): Callback<AccessToken> {
         override fun onResponse(call: Call<AccessToken>, response: Response<AccessToken>) {
             Log.e("ON Response RefreshToken:"," ${response.body()?.access_token}")
-            val newRefreshedToken = AccessToken(
-                access_token = response.body()?.access_token?:"",
-                        expires_in = response.body()?.expires_in?:0,
-                        refresh_token = response.body()?.refresh_token?:"",
-                        scope = response.body()?.scope?:"",
-                        token_type = response.body()?.token_type?:""
-            )
-            Log.e("RESPONDED WITH:","RefresehedToken: ${newRefreshedToken.access_token}, ${response.isSuccessful}")
-            onSuccess(newRefreshedToken)
+            val newRefreshedToken = response.body()?.access_token?.let {
+                response.body()?.expires_in?.let { it1 ->
+                    response.body()?.refresh_token?.let { it2 ->
+                        response.body()?.scope?.let { it3 ->
+                            response.body()?.token_type?.let { it4 ->
+                                AccessToken(
+                                    access_token = it,
+                                    expires_in = it1,
+                                    refresh_token = it2,
+                                    scope = it3,
+                                    token_type = it4
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Log.e("RESPONDED WITH:","RefresehedToken: ${newRefreshedToken?.access_token}, ${response.isSuccessful}")
+            if (newRefreshedToken != null) {
+                onSuccess(newRefreshedToken)
+            }
         }
 
         override fun onFailure(call: Call<AccessToken>, t: Throwable) {

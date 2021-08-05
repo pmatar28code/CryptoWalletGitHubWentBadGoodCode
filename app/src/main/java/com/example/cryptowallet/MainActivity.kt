@@ -69,19 +69,42 @@ class MainActivity : AppCompatActivity() {
                 )
 
                 UserNetwork.getUser {
-                    Log.e("SHOWING USER", "${it.name}, id: ${it.id}")
-                    Repository.userId = it.id.toString()
+                    runBlocking {
+                        var job:Job = launch(IO) {
+                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                            Log.e("SHOWING USER", "${it.name}, id: ${it.id} WITH TOKEN = $token")
+                            Repository.userId = it.id.toString()
+                            joinAll()
+                        }
+                    }
                 }
 
                 ListAccountsNetwork.getAccounts {
                     Repository.accountId = it[0].id?:""
-                    Log.e("LIST OF ACCOUNTS MAIN OJO: ","ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency}")
-                   // Repository.accountId = it.id.toString()
-                    //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
+                    runBlocking {
+                        var job:Job = launch(IO) {
+                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                            Log.e(
+                                "LIST OF ACCOUNTS MAIN OJO: ",
+                                "ID: ${it[0].id}, ${it[0].name}, ${it[0].balance}, ${it[0].currency} WITH TOKEN = $token"
+                            )
+                            joinAll()
+                            // Repository.accountId = it.id.toString()
+                        }   //Log.e("SHOWING NEW ADDRESS:", "${it.id}, ${it.name}, ${it.balance}")
+                    }
                 }
 
                 AddressNetwork.getAddresses {
-                    Log.e("CREATE ADDRESS MAIN: ","${it.address} , ${it.name} , ${it.createdAt}")
+                    runBlocking {
+                        var job: Job = launch(IO) {
+                            var token = database?.AccessTokenDao()?.getAllTokens()?.get(0)
+                            Log.e(
+                                "CREATE ADDRESS MAIN: ",
+                                "${it.address} , ${it.name} , ${it.createdAt} , WITH TOKEN = $token"
+                            )
+                            joinAll()
+                        }
+                    }
                 }
 
                 //AccessTokenProviderImp().refreshToken {

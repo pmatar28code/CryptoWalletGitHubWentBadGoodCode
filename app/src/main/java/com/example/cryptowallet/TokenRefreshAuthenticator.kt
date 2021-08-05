@@ -29,9 +29,9 @@ class TokenRefreshAuthenticator(
     }
 
     private fun Response.createSignedRequest(): Request? = try {
-        authorizationRepository.refreshToken {
-            FreshAccessToken = it
-        }
+        //authorizationRepository.refreshToken {
+           // FreshAccessToken = it
+       // }
         Log.e("AUTHENTICATOR FRESH ACCESTOKEN:","$FreshAccessToken")
         request.signWithToken(FreshAccessToken!!)
     } catch (error: Throwable) {

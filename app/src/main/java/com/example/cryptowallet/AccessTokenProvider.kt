@@ -11,5 +11,5 @@ interface AccessTokenProvider {
      * Refreshes the token and returns it. This call should be made synchronously.
      * In the event that the token could not be refreshed return null.
      */
-    fun refreshToken(refreshCallback: (AccessToken) -> Unit)
+    fun refreshToken(refreshCallback: (Boolean) -> Unit)
 }
